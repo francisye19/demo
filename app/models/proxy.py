@@ -9,7 +9,7 @@ class Proxy(Model):
     __collection__ = 'proxies'
     structure = {
         'hostname': unicode,
-        'hostAddress': int,
+        'hostAddress': unicode,
         'status': int,
         'lastCheck': datetime,
         'createTime': datetime,
