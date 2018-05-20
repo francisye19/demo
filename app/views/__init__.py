@@ -14,3 +14,4 @@ from blog import blog
 from crud import crud
 from public import public
 from seo import seo
+from proxy import proxy

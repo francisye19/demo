@@ -1,0 +1,111 @@
+{% extends "layout.html" %}
+
+{% block title %}{{ _('Proxies Overview') }}{% endblock %}
+
+{% block main_inner %}
+    <div class="container">
+        <div>
+            <span>自动刷新：</span>
+            <select>
+                <option value="3s">3s</option>
+                <option value="10s">10s</option>
+                <option value="30s">30s</option>
+                <option value="1min">1min</option>
+                <option value="5min">5min</option>
+            </select>
+        </div>
+        <div class="row">
+            <div class="col-md-12 text-center">
+                <h1>{{ _('Proxies Overview') }}</h1>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12 text-center">
+                <table id="table_proxy"></table>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block script %}
+    <script src="{{ base_url() }}/js/jquery.min.js"></script>
+    <script src="{{ base_url() }}/js/jquery.jqGrid.min.js"></script>
+    <script type="text/javascript">
+        function action(btn) {
+            if (btn.is(".doing")) {
+                return;
+            }
+            var con = window.confirm("action?");
+            if (!con) {
+                return false;
+            }
+
+            // Validation goes here.
+
+            // Set doing to prevent duplicate clicks
+            btn.addClass("doing");
+            var method = btn.is("input") ? "val" : "text";
+            var oldLabel = btn[method]();
+            btn[method](oldLabel + "...");
+
+            // Post
+            $.post("action", {"r": Math.random()}, function (result) {
+                if (result.success) {
+                    showSuccess(result.message);
+                } else {
+                    showError(result.message);
+                }
+                btn.removeClass("doing");
+                btn[method](oldLabel);
+            }, 'json');
+        }
+        function process_data(data) {
+            var processed_data = []
+            for(var i = 0; i < data.length; i++) {
+                processed_data.push({"hostname": data[i][0],
+                                    "hostAddress": data[i][1],
+                                    "status": data[i][2],
+                                    "lastCheck": data[i][3],
+                                    "creatTime": data[i][4]})
+            }
+            return processed_data
+        }
+        function statusFormatter(status) {
+            if(status == 0) {
+                return "可用"
+            } else {
+                return "不可用"
+            }
+        }
+        function statusCellAttr(rowId, val, rawObject, cm, rdata) {
+            if(val == "可用") {
+                return "style='color:green'"
+            } else {
+                return "style='color:red'"
+            }
+        }
+
+        var data = process_data({{ proxies|tojson }})
+        console.log(data)
+        $("#table_proxy").jqGrid({
+            {#url: 'server.php?q=2',//请求数据的地址  #}
+            datatype: "local",
+            colNames: ['主机名', '主机地址', '状态', '最近检查', '创建时间'],
+            //jqgrid主要通过下面的索引信息与后台传过来的值对应
+            colModel: [
+                {name: 'hostname', index: 'id', width: 100},
+                {name: 'hostAddress', index: 'invdate', width: 90},
+                {name: 'status', index: 'name', width: 100, formatter: statusFormatter, cellattr: statusCellAttr},
+                {name: 'lastCheck', index: 'name', width: 200},
+                {name: 'createTime', index: 'name', width: 200}
+            ],
+            caption: "代理服务器概览",
+            jsonReader: {
+                root: 'data'
+            }
+        });
+        for(var i = 0;i < data.length; i++){
+            $("#table_proxy").jqGrid('addRowData', i + 1, data[i]);
+        }
+    </script>
+{% endblock %}

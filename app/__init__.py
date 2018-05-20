@@ -38,7 +38,8 @@ DEFAULT_BLUEPRINTS = (
     (views.admin, '/admin'),
     (views.crud, '/crud'),
     (views.blog, '/blog'),
-    (views.seo, '/seo')
+    (views.seo, '/seo'),
+    (views.proxy, '/proxy')
 )
 
 
